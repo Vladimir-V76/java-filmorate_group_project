@@ -52,8 +52,9 @@ CREATE TABLE IF NOT EXISTS reviews (
     film_id BIGINT NOT NULL,
     useful BIGINT NOT NULL,
     PRIMARY KEY (review_id),
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (film_id) REFERENCES films(id)
+    CONSTRAINT unique_user_film UNIQUE (user_id, film_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE
 );
 
 MERGE INTO genres (id, name) KEY (id) VALUES
