@@ -13,7 +13,7 @@ public class ReviewMapper {
     public static Review mapToReview(NewReviewRequest newReviewRequest) {
         Review review = new Review();
         review.setContent(newReviewRequest.getContent());
-        review.setPositive(newReviewRequest.getIsPositive());
+        review.setIsPositive(newReviewRequest.getIsPositive());
         review.setUserId(newReviewRequest.getUserId());
         review.setFilmId(newReviewRequest.getFilmId());
 
@@ -26,7 +26,7 @@ public class ReviewMapper {
             review.setContent(updateReview.getContent());
         }
         if (updateReview.hasPositive()) {
-            review.setPositive(updateReview.getIsPositive());
+            review.setIsPositive(updateReview.getIsPositive());
         }
         if (updateReview.hasUserId()) {
             review.setUserId(updateReview.getUserId());

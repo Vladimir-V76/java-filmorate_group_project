@@ -6,12 +6,11 @@ import ru.yandex.practicum.filmorate.dal.repositories.film.ReviewRepository;
 import ru.yandex.practicum.filmorate.model.film.Review;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Component("reviewDbStorage")
 @RequiredArgsConstructor
-public class ReviewDbStorage implements ReviewStorage{
+public class ReviewDbStorage implements ReviewStorage {
 
     private final ReviewRepository reviewRepository;
 
@@ -36,23 +35,13 @@ public class ReviewDbStorage implements ReviewStorage{
     }
 
     @Override
-    public Collection<Review> getReviewsByFilmId(Long id, int count) {
-        return List.of();
+    public Collection<Review> getAllReviewsByFilmId(Long filmId) {
+        return reviewRepository.findReviewsByFilmId(filmId);
     }
 
     @Override
-    public Review putLikeReviewById(Long id, Long userId) {
-        return null;
-    }
-
-    @Override
-    public Review putDislikeReviewById(Long id, Long userId) {
-        return null;
-    }
-
-    @Override
-    public Optional<Review> findReviewById(Long id) {
-        return reviewRepository.findById(id);
+    public Collection<Review> getAllReviews() {
+        return reviewRepository.findAll();
     }
 
     @Override

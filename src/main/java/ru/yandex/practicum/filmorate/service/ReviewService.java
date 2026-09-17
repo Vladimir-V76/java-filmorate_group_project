@@ -9,9 +9,11 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.film.Review;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.ReviewLikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -20,16 +22,19 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final ReviewLikeStorage reviewLikeStorage;
 
     public ReviewService(
             @Qualifier("reviewDbStorage") ReviewStorage reviewStorage,
             @Qualifier("filmDbStorage") FilmStorage filmStorage,
-            @Qualifier("userDbStorage") UserStorage userStorage
+            @Qualifier("userDbStorage") UserStorage userStorage,
+            @Qualifier("reviewLikeDbStorage") ReviewLikeStorage reviewLikeStorage
 
     ) {
         this.reviewStorage = reviewStorage;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.reviewLikeStorage = reviewLikeStorage;
     }
 
     public Review postReview(NewReviewRequest review) {
@@ -40,8 +45,12 @@ public class ReviewService {
 
     public Review updateReview(UpdateReviewRequest updateReview) {
         Review review = findReviewById(updateReview.getReviewId());
-        if (updateReview.hasFilmId()) { findFilmById(updateReview.getFilmId()); }
-        if (updateReview.hasUserId()) { findUserById(updateReview.getUserId()); }
+        if (updateReview.hasFilmId()) {
+            findFilmById(updateReview.getFilmId());
+        }
+        if (updateReview.hasUserId()) {
+            findUserById(updateReview.getUserId());
+        }
         ReviewMapper.updateReviewFields(review, updateReview);
 
         //Пара user_id и film_id уникальная для таблицы reviews. Проверяем наличие такой пары в другом отзыве
@@ -66,6 +75,40 @@ public class ReviewService {
         return findReviewById(id);
     }
 
+    public Collection<Review> getAllReviewsByFilmId(Long filmId, int count) {
+        //filmId = 0, когда пользователь не указал этот параметр в запросе -> берем все отзывы
+        if (filmId == 0L) {
+            return reviewStorage.getAllReviews().stream().limit(count).toList();
+        } else {
+            findFilmById(filmId);
+            return reviewStorage.getAllReviewsByFilmId(filmId).stream().limit(count).toList();
+        }
+    }
+
+    public Review changeUsefulReview(Long reviewId, Long userId, int indexUseful) {
+        findUserById(userId);
+        Review review = findReviewById(reviewId);
+        long usefulBeforeChanges = getUseful(reviewId);
+        switch (indexUseful) {
+            case 0:
+                reviewLikeStorage.addUseful(reviewId, userId, false);
+                break;
+            case 1:
+                reviewLikeStorage.addUseful(reviewId, userId, true);
+                break;
+            case 2:
+                reviewLikeStorage.deleteUseful(reviewId, userId);
+                break;
+        }
+        long usefulAfterChanges = getUseful(reviewId);
+
+        if (usefulBeforeChanges != usefulAfterChanges) {
+            review.setUseful(usefulAfterChanges);
+            reviewStorage.updateReview(review);
+        }
+        return review;
+    }
+
     private void findFilmById(Long id) {
         filmStorage.findFilmById(id)
                 .orElseThrow(() -> new NotFoundException("Фильм не найден, id=" + id));
@@ -77,7 +120,11 @@ public class ReviewService {
     }
 
     private Review findReviewById(Long id) {
-        return reviewStorage.findReviewById(id)
+        return reviewStorage.getReviewById(id)
                 .orElseThrow(() -> new NotFoundException("Отзыв не найден, id=" + id));
+    }
+
+    private long getUseful(Long reviewId) {
+        return reviewLikeStorage.getCountLikes(reviewId) - reviewLikeStorage.getCountDislikes(reviewId);
     }
 }

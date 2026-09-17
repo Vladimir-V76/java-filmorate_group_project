@@ -17,13 +17,23 @@ public class UpdateReviewRequest {
     private Long filmId;
     private Long useful;
 
-    public boolean hasContent() { return !(content == null || content.isBlank()); }
+    public boolean hasContent() {
+        return !(content == null || content.isBlank());
+    }
 
-    public boolean hasPositive() { return isPositive != null; }
+    public boolean hasPositive() {
+        return isPositive != null;
+    }
 
-    public boolean hasUserId() { return userId != null; }
+    public boolean hasUserId() {
+        return userId != null;
+    }
 
-    public boolean hasFilmId() { return filmId != null; }
+    public boolean hasFilmId() {
+        return filmId != null;
+    }
 
-    public boolean hasUseful() { return useful != null; }
+    public boolean hasUseful() {
+        return useful != null;
+    }
 }

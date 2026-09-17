@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.repositories.BaseRepository;
 import ru.yandex.practicum.filmorate.model.film.Review;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Repository
@@ -28,11 +29,15 @@ public class ReviewRepository extends BaseRepository<Review> {
 
     public static final String DELETE_QUERY = "DELETE FROM reviews WHERE review_id = ?";
 
+    public static final String FIND_BY_FILM_ID_QUERY = "SELECT * FROM reviews WHERE film_id = ? ORDER BY useful DESC";
+
+    public static final String FIND_ALL_QUERY = "SELECT * FROM reviews ORDER BY useful DESC";
+
     public Review createReview(Review review) {
         long id = insert(
                 INSERT_QUERY,
                 review.getContent(),
-                review.isPositive(),
+                review.getIsPositive(),
                 review.getUserId(),
                 review.getFilmId(),
                 review.getUseful()
@@ -49,7 +54,7 @@ public class ReviewRepository extends BaseRepository<Review> {
         update(
                 UPDATE_QUERY,
                 review.getContent(),
-                review.isPositive(),
+                review.getIsPositive(),
                 review.getUserId(),
                 review.getFilmId(),
                 review.getUseful(),
@@ -64,9 +69,14 @@ public class ReviewRepository extends BaseRepository<Review> {
     }
 
     public void deleteByReviewId(Long id) {
-        delete(
-                DELETE_QUERY,
-                id
-        );
+        delete(DELETE_QUERY, id);
+    }
+
+    public Collection<Review> findReviewsByFilmId(Long filmId) {
+        return findMany(FIND_BY_FILM_ID_QUERY, filmId);
+    }
+
+    public Collection<Review> findAll() {
+        return findMany(FIND_ALL_QUERY);
     }
 }

@@ -8,15 +8,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Component
-public class ReviewRowMapper implements RowMapper<Review>
-{
+public class ReviewRowMapper implements RowMapper<Review> {
     @Override
     public Review mapRow(ResultSet rs, int rowNum) throws SQLException {
         Review review = new Review();
 
         review.setReviewId(rs.getLong("review_id"));
         review.setContent(rs.getString("content"));
-        review.setPositive(rs.getBoolean("is_positive"));
+        review.setIsPositive(rs.getBoolean("is_positive"));
         review.setUserId(rs.getLong("user_id"));
         review.setFilmId(rs.getLong("film_id"));
         review.setUseful(rs.getLong("useful"));
